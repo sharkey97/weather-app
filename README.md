@@ -1,66 +1,63 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Weather App
+This is an app used to showcase a custom package used to take as url input an IP address and output the citie's current weather. It displays the data using a blade template, but the raw data can additionally be accessed for use in the user's code elsewhere.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The code requires at least one API call to retrieve location, and requires two for outputting weather. Both the IP and weather APIs have redundancy so if max requests have been reached or the API crashes, it will automatically switch to another.
 
-## About Laravel
+<H1> Working Example </H1>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+To access the packages view, the must navigate to the 'weather' route, followed by their desired IP address. For example "http://domain/weather/122.62.248.72"
+This will output the blade template and display basic information such as the location, temperature, general weather condition, and image. Example below
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<img src="![image](https://github.com/sharkey97/weather-app/assets/45834305/f0588444-07b8-49d6-860c-f00e5ada8d9a)">
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+If the user wishes to display on screen only the raw data, they can do so by following one of the two address: "http://localhost:8888/forecast/122.62.248.72/location", or "http://localhost:8888/forecast/122.62.248.72/weather". This will display a raw dump of the JSON data provided by the API.
+Furthermore, if the user wishes to access this raw data in the code, they can do so by calling the Forecast class provided by the package, example below.
 
-## Learning Laravel
+```     
+use Sharkey97\WeatherFromIp\Forecast;
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+//define class and function
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+$weather = app()->make(Forecast::class);
+$weatherData = $weather->index($ip);
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+$location = app()->make(Forecast::class);
+$locationData = $location->index($ip, true);
+```
 
-## Laravel Sponsors
+<H3> Database </h3>
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+The ```ForecastController.php``` saves all data to a MySQL database, and saves into 3 linked tables, 'request_data', 'locations', and 'forecasts'. Where a request has one location, which has many forecasts. 
 
-### Premium Partners
+The Database has a default configuration of:
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=password
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+<H3> Running </H3>
 
-## Contributing
+Due to the package using an API, the user must create an API key and store it in the .env file:  
+```OPEN_WEATHER_MAP_KEY=<your_api_key>```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Firstly, ensure the package is installed.  
+```composer require sharkey97/weatherfromip``` 
 
-## Code of Conduct
+Then, migrate the database.
+```docker-compose exec app php artisan migrate      ``` 
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The app uses docker to run, and must be initiated using the following commands
 
-## Security Vulnerabilities
+1. Start the docker file: 
+    ```docker-compose up -d``` 
+2. Add encryption key: 
+    ```docker-compose exec app php artisan key:generate``` 
+    
+The app will be hosted on localhost:8888. Test the app by visiting: "http://localhost:8888/weather/122.62.248.72"
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+<H3> Future Development</H3>
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+To improve the functionality of this app further, I would add more to the view, such as adding an interacive map using leaflet. I would also give the user more flexibilty in the options to input IP addresses through a UI based formfield rather than pass the information in through the URL.
+ 
