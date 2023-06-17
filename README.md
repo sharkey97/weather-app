@@ -1,11 +1,11 @@
 # Weather App
-This is an app used to showcase a custom package used to take as url input an IP address and output the citie's current weather. It displays the data using a blade template, but the raw data can additionally be accessed for use in the user's code elsewhere.
+This is an app used to showcase a custom package used to take as url input an IP address and output the city's current weather. It displays the data using a blade template, but the raw data can additionally be accessed for use in the user's code elsewhere.
 
 The code requires at least one API call to retrieve location, and requires two for outputting weather. Both the IP and weather APIs have redundancy so if max requests have been reached or the API crashes, it will automatically switch to another.
 
 <H1> Working Example </H1>
 
-To access the packages view, the must navigate to the 'weather' route, followed by their desired IP address. For example "http://domain/weather/122.62.248.72"
+To access the packages view, the user must navigate to the 'weather' route, followed by their desired IP address. For example "http://domain/weather/122.62.248.72"
 This will output the blade template and display basic information such as the location, temperature, general weather condition, and image. Example below
 
 <img src="![image](https://github.com/sharkey97/weather-app/assets/45834305/f0588444-07b8-49d6-860c-f00e5ada8d9a)">
